@@ -13,12 +13,10 @@
             --background-color: white;
             --text-color: black;
         }
-
         :root.dark-theme {
             --background-color: black;
             --text-color: white;
         }
-
         * {
             background-color: var(--background-color);
             color: var(--text-color);
@@ -33,7 +31,8 @@
 
     <body>
         <div id="app">
-            <h2>{{message}}</h2>
+            <h1>{{message}}</h1>
+
             <button @click="toggleTheme">切换主题</button>
         </div>
 
