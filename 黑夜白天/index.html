@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>黑夜白天切换</title>
+        <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.js"></script>
+    </head>
+
+    <style>
+        :root {
+            --background-color: white;
+            --text-color: black;
+        }
+
+        :root.dark-theme {
+            --background-color: black;
+            --text-color: white;
+        }
+
+        * {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 5px;
+        }
+
+        .myClass{
+            font-size: 50px;
+        }
+    </style>
+
+    <body>
+        <div id="app">
+            <p>{{message}}</p>
+
+            <button @click="toggleTheme">切换主题</button>
+        </div>
+
+        <script>
+            const { createApp, ref } = Vue
+            createApp({
+                setup() {
+                    const message = ref('Hello Vue 3.0!')
+                    document.documentElement.className='myClass'
+                    const toggleTheme = () => {
+
+                        // 获取当前文档的className
+                        console.log(document.documentElement.className);
+                        // 如果className为dark-theme，则theme为空，否则theme为dark
+                        // this.theme = document.documentElement.className === 'dark-theme' ? '' : 'dark';
+                        // 设置文档的className为theme + '-theme'
+                        // document.documentElement.className = this.theme + '-theme';
+
+                        // 判断当前是否为暗色主题
+                        if (document.documentElement.className.indexOf('dark-theme') > -1){
+                            // 如果是暗色主题，则添加浅色主题的类名，并移除暗色主题的类名
+                            document.documentElement.classList.add('light-theme');
+                            document.documentElement.classList.remove('dark-theme');
+                        } else {
+                            // 如果不是暗色主题，则添加暗色主题的类名，并移除浅色主题的类名
+                            document.documentElement.classList.add('dark-theme');
+                            document.documentElement.classList.remove('light-theme');
+                        }
+                    }
+                    return {
+                        message,
+                        toggleTheme
+                    }
+                }
+
+            }).mount('#app')
+        </script>
+    </body>
+</html>
