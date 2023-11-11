@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script>
+            // S盒
+            var S = [
+                0x4d34d34d, 0xd34d34d3, 0x34d34d34, 0x4d34d34d,
+                0xd34d34d3, 0x34d34d34, 0x4d34d34d, 0xd34d34d3,
+                0x34d34d34, 0x4d34d34d, 0xd34d34d3, 0x34d34d34,
+                0x4d34d34d, 0xd34d34d3, 0x34d34d34, 0x4d34d34d
+            ];
+
+            // V向量
+            var V = [
+                0x1589367c, 0x2f78d0e1, 0x471bc268, 0x5be0b82f
+            ];
+
+            // Rabbit算法加密
+            function rabbitEncrypt(key, iv, plaintext) {
+                var X = [];
+                var C = [];
+                var K = [];
+
+                // 初始化
+                for (var i = 0; i < 8; i++) {
+                    X[i] = key[i * 4] << 24 | key[i * 4 + 1] << 16 | key[i * 4 + 2] << 8 | key[i * 4 + 3];
+                }
+                for (var i = 0; i < 4; i++) {
+                    C[i] = iv[i * 4] << 24 | iv[i * 4 + 1] << 16 | iv[i * 4 + 2] << 8 | iv[i * 4 + 3];
+                }
+
+                // 初始化状态向量S
+                var S = [];
+                for (var i = 0; i < 8; i++) {
+                    S[i] = X[i] ^ 0x9e3779b9;
+                }
+
+                // 循环迭代
+                for (var n = 0; n < 4; n++) {
+                    for (var i = 0; i < 8; i++) {
+                        var x = (C[(n + i) % 4] ^ S[i]) >>> 0;
+                        S[i] = (x >> 31) ^ (S[i] << 1) ^ (x & 0x7fffffff);
+                        X[i] ^= S[i];
+                    }
+                    for (var i = 0; i < 8; i++) {
+                        var k = X[i] + S[i];
+                        K[4 * n + i] = k;
+                        C[(n + i) % 4] ^= k;
+                    }
+                }
+
+                // 加密
+                var ciphertext = new Uint8Array(plaintext.length);
+                for (var i = 0; i < plaintext.length; i++) {
+                    if (i % 16 === 0) {
+                        // 生成密钥流
+                        var G = new Uint32Array(4);
+                        for (var j = 0; j < 4; j++) {
+                            G[j] = S[j] ^ S[(j + 5) % 8] ^ S[(j + 3) % 8] << 16 >>> 0;
+                        }
+                        for (var j = 0; j < 4; j++) {
+                            var y = G[j] + C[j] >>> 0;
+                            C[j] = ((S[(j + 1) % 8] >> 31) | (S[(j + 1) % 8] << 1)) ^ y;
+                            var z = (G[(j + 1) % 4] + S[(j + 1) % 8]) >>> 0;
+                            S[(j + 1) % 8] = (z >> 31) ^ (S[(j + 1) % 8] << 1) ^ (z & 0x7fffffff);
+                        }
+                    }
+                    ciphertext[i] = plaintext[i] ^ (K[i % 16] >>> (8 * (3 - i % 4)) & 0xff);
+                }
+
+                return ciphertext;
+            }
+
+            // Rabbit算法解密
+            function rabbitDecrypt(key, iv, ciphertext) {
+                var X = [];
+                var C = [];
+                var K = [];
+
+                // 初始化
+                for (var i = 0; i < 8; i++) {
+                    X[i] = key[i * 4] << 24 | key[i * 4 + 1] << 16 | key[i * 4 + 2] << 8 | key[i * 4 + 3];
+                }
+                for (var i = 0; i < 4; i++) {
+                    C[i] = iv[i * 4] << 24 | iv[i * 4 + 1] << 16 | iv[i * 4 + 2] << 8 | iv[i * 4 + 3];
+                }
+                for (var i = 0; i < 16; i++) {
+                    K[i] = ciphertext[i * 4] << 24 | ciphertext[i * 4 + 1] << 16 | ciphertext[i * 4 + 2] << 8 | ciphertext[i * 4 + 3];
+                }
+
+                // 初始化状态向量S
+                var S = [];
+                for (var i = 0; i < 8; i++) {
+                    S[i] = X[i] ^ 0x9e3779b9;
+                }
+
+                // 循环迭代
+                for (var n = 0; n < 4; n++) {
+                    for (var i = 0; i < 8; i++) {
+                        var x = (C[(n + i) % 4] ^ S[i]) >>> 0;
+                        S[i] = (x >> 31) ^ (S[i] << 1) ^ (x & 0x7fffffff);
+                        X[i] ^= S[i];
+                    }
+                    for (var i = 0; i < 8; i++) {
+                        var k = K[4 * ((3 - n) % 4) + i] ^ X[i];
+                        K[4 * ((3 - n) % 4) + i] = k;
+                        C[(n + i) % 4] ^= k;
+                    }
+                }
+
+                // 加密
+                var plaintext = new Uint8Array(ciphertext.length);
+                for (var i = 0; i < ciphertext.length; i++) {
+                    if (i % 16 === 0) {
+                        // 生成密钥流
+                        var G = new Uint32Array(4);
+                        for (var j = 0; j < 4; j++) {
+                            G[j] = S[j] ^ S[(j + 5) % 8] ^ S[(j + 3) % 8] << 16 >>> 0;
+                        }
+                        for (var j = 0; j < 4; j++) {
+                            var y = G[j] + C[j] >>> 0;
+                            C[j] = ((S[(j + 1) % 8] >> 31) | (S[(j + 1) % 8] << 1)) ^ y;
+                            var z = (G[(j + 1) % 4] + S[(j + 1) % 8]) >>> 0;
+                            S[(j + 1) % 8] = (z >> 31) ^ (S[(j + 1) % 8] << 1) ^ (z & 0x7fffffff);
+                        }
+                    }
+                    plaintext[i] = ciphertext[i] ^ (K[i % 16] >>> (8 * (3 - i % 4)) & 0xff);
+                }
+
+                return plaintext;
+            }
+
+            // 加解密测试案例
+            var key = new Uint8Array([0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef]);
+            var iv = new Uint8Array([0x01, 0x23, 0x45, 0x67]);
+
+            var plaintext = new Uint8Array([
+                0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f,
+                0x72, 0x6c, 0x64, 0x21
+            ]);
+
+            var ciphertext = rabbitEncrypt(key, iv, plaintext);
+            console.log("加密结果:", ciphertext);
+
+            var decrypted = rabbitDecrypt(key, iv, ciphertext);
+            console.log("解密结果:", decrypted);
+
+            // 验证加解密结果是否正确
+            if (decrypted.toString() === plaintext.toString()) {
+                console.log("加解密成功！");
+            } else {
+                console.error("加解密失败！");
+            }
+        </script>
+    </body>
+</html>

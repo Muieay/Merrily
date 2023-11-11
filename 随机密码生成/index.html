@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>随机密码生成</title>
+    </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #efffeb;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            min-height: 100vh;
+        }
+        .box {
+            background-color: rgb(139, 181, 255);
+            padding-top: 30px;
+            padding: 30px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .box h2 {
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 26px;
+            color: #015a96;
+            font-family: sans-serif;
+        }
+        .inputGen {
+            padding: 20px;
+            user-select: none;
+            height: 50px;
+            width: 400px;
+            border-radius: 6px;
+            border: none;
+            border: 2px solid rgb(13, 152, 245);
+            outline: none;
+            font-size: 22px;
+        }
+
+        .inputNum{
+            position: absolute;
+            padding: 20px;
+            user-select: none;
+            height: 50px;
+            width: 100px;
+            border-radius: 6px;
+            border: none;
+            border: 2px solid rgb(13, 152, 245);
+            outline: none;
+            font-size: 22px;
+            top: 20px;
+            right: 30px;
+        }
+
+        input::placeholder {
+            font-size: 23px;
+        }
+        #button {
+            font-family: sans-serif;
+            font-size: 15px;
+            margin-top: 40px;
+            border: 2px solid rgb(20, 139, 250);
+            width: 155px;
+            height: 50px;
+            text-align: center;
+            background-color: #0c81ee;
+            display: flex;
+            color: rgb(255, 255, 255);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 7px;
+        }
+        .btn2 {
+            margin-left: 85px;
+        }
+        #button:hover {
+            color: white;
+            background-color: black;
+        }
+    </style>
+    <body>
+        <div class="box">
+            <h2>随机密码生成器</h2>
+            <input class="inputGen" type="text" name="" placeholder="创建密码" id="password" readonly>
+            <input class="inputNum" id="passwordLength" type="number">
+            <table>
+                <th>
+                    <div id="button" class="btn1" onclick="genPassword()">生成</div>
+                </th>
+                <th><a id="button" class="btn2" onclick="copyPassword()">复制</a></th>
+            </table>
+        </div>
+        <script>
+            var password = document.getElementById("password"); 
+            // 生成随机密码
+            function genPassword() {
+                var chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                
+                var passwordLength=12;
+                var myLength = document.getElementById("passwordLength");
+                if(myLength.value!=='' && myLength.value>0){
+                    passwordLength=myLength.value-1
+                }
+
+                var password = "";
+                for (var i = 0; i <= passwordLength; i++) {
+                    var randomNumber = Math.floor(Math.random() * chars.length);
+                    password += chars.substring(randomNumber, randomNumber + 1);
+                }
+                document.getElementById("password").value = password;
+            }
+
+            //复制: 使用document.execCommand激活按钮
+            function copyPassword() {
+                var copyText = document.getElementById("password");
+                copyText.select();
+                copyText.setSelectionRange(0, 999);
+                document.execCommand("copy");
+            }
+        </script>
+    </body>
+</html>
