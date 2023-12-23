@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>输入框下拉输入建议</title>
+    </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background-color: #ccc;
+        }
+
+        input {
+            padding: 10px;
+            /* 输入框内边距 */
+            border: 1px solid #ccc;
+            /* 输入框边框颜色 */
+            border-radius: 5px;
+            /* 输入框边框圆角 */
+            color: #666;
+            /* 输入框文字颜色 */
+            width: 200px; /* 设置输入框宽度 */
+        }
+
+        /* 鼠标悬停时的效果 */
+        input:hover {
+            border-color: #888;
+            /* 悬停时边框颜色 */
+        }
+
+        /* 建议框样式 */
+        .suggestion-box {
+            display: none;
+            position: absolute;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 200px; /* 设置建议框最大宽度 */
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 每个建议的样式 */
+        .suggestion-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        /* 每个建议的样式 - 鼠标悬停时 */
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+    <body>
+
+        <!-- 输入框 -->
+        <div style="position: relative;">
+            <input type="text" id="myInput" oninput="showSuggestions(this.value)" placeholder="请输入内容">
+            <!-- 建议框 -->
+            <div class="suggestion-box" id="suggestionBox"></div>
+        </div>
+
+        <script>
+            // 模拟建议数据
+            const suggestions = ["建议1", "建议2", "建议3", "建议4", "建议5"];
+
+            // 显示建议
+            function showSuggestions(inputValue) {
+                const suggestionBox = document.getElementById("suggestionBox");
+
+                // 清空建议框内容
+                suggestionBox.innerHTML = "";
+
+                // 过滤符合条件的建议
+                const filteredSuggestions = suggestions.filter(suggestion =>
+                    suggestion.toLowerCase().includes(inputValue.toLowerCase())
+                );
+
+                // 显示建议框
+                if (filteredSuggestions.length > 0) {
+                    suggestionBox.style.display = "block";
+                    const inputRect = document.getElementById("myInput").getBoundingClientRect();
+
+                    // 设置建议框位置
+                    suggestionBox.style.left = inputRect.left + "px";
+                    suggestionBox.style.top = inputRect.bottom + "px";
+
+                    // 添加建议到建议框
+                    filteredSuggestions.forEach(suggestion => {
+                        const suggestionItem = document.createElement("div");
+                        suggestionItem.classList.add("suggestion-item");
+                        suggestionItem.textContent = suggestion;
+
+                        // 点击建议时，将建议内容填入输入框
+                        suggestionItem.addEventListener("click", () => {
+                            document.getElementById("myInput").value = suggestion;
+                            suggestionBox.style.display = "none";
+                        });
+
+                        suggestionBox.appendChild(suggestionItem);
+                    });
+                } else {
+                    suggestionBox.style.display = "none";
+                }
+            }
+
+            // 点击页面其他地方时，隐藏建议框
+            document.addEventListener("click", function (e) {
+                const suggestionBox = document.getElementById("suggestionBox");
+                if (!e.target.matches("#myInput") && !e.target.matches(".suggestion-item")) {
+                    suggestionBox.style.display = "none";
+                }
+            });
+        </script>
+
+    </body>
+</html>

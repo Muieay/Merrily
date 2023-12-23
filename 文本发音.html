@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input id="ipt" type="text" value="" placeholder="请输入内容" >
+    <input id="btn" type="button" value="发音">
+
+    <script>
+        // 1. 获取元素
+        var input = document.querySelector('#ipt');
+        var btn = document.querySelector('#btn');
+        // 2. 绑定事件 
+        btn.onclick = function(){  
+            // 3. 获取输入框的内容
+            var value = input.value;
+            // 4. 调用发音api
+            var ssa = new SpeechSynthesisUtterance(value);
+            // 4.1 设置语速
+            ssa.rate = 0.5;
+            // 4.2 设置语调
+            ssa.pitch = 0.5;
+            // 4.3 设置音量
+            ssa.volume = 1;
+            // // 5. 调用api
+            window.speechSynthesis.speak(ssa);
+        
+    
+        }
+    </script>
+</body>
+</html>
